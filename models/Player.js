@@ -17,9 +17,18 @@ class Player {
         this.isDeath = false;
         this.healty = 100;
         this.bulletSpeed = 10;
+        this.bulletColor=this.getRandomColor();
     }
     getRandom = (min, max) => {
         return Math.floor(Math.random() * (max - min) + min);
+    }
+    getRandomColor = () => {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
     move = () => {
         this.targetX += this.dirx * this.speed;

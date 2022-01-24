@@ -1,21 +1,19 @@
 
 
 const Game = require("./models/Game");
-const Bullet = require("./models/Bullet");
-const Player = require("./models/Player");
-
 const { server, io, app } = require("./services/initApp");
 
 const game = new Game();
-var count = 0;
+
+
 var circleInterval = setInterval(() => {
     game.onCircleInside();
     if (game.circle.radius % 100 == 0) {
         game.circleDec = false;
-        count++;
+        game.circleCount++;
     }
-    if (count == 5) {
-        count = 0;
+    if (game.circleCount == 5) {
+        game.circleCount = 0;
         game.circleDec = true;
         game.changeCenter();
     }
@@ -32,7 +30,6 @@ var circleInterval = setInterval(() => {
 setInterval(() => {
     game.update();
     io.emit("GAME_UPDATE", {
-        circle: game.circle,
         players: game.players.map(i => {
             return {
                 id: i.id,
@@ -47,31 +44,22 @@ setInterval(() => {
                 id: i.id,
                 playerID: i.playerID,
                 x: i.posx,
-                y: i.posy
+                y: i.posy,
+                color: i.color
             }
         })
     })
 }, 60);
 
 io.on('connection', (socket) => {
-    console.log(`user connection ${socket.id}`);
-    var player = new Player(game, socket.id);
-    game.players.push(player);
+
+    game.addPlayer(socket.id);
 
     socket.on("FIRE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
         if (player) {
-            var d = Math.sqrt(Math.pow(Math.abs(player.posx - data.x), 2) + Math.pow(Math.abs(player.posy - data.y), 2))
-            var xChange = (data.x - player.posx) / (d / player.bulletSpeed);
-            var yChange = (data.y - player.posy) / (d / player.bulletSpeed);
-            game.bullets.push(new Bullet({
-                id: player.id,
-                posx: player.posx,
-                posy: player.posy,
-            }, xChange, yChange));
+            game.addBullet(player, data);
         }
-
-
     })
     socket.on("PLAYER_MOVE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
@@ -82,7 +70,7 @@ io.on('connection', (socket) => {
     })
     socket.on('disconnect', () => {
         game.players = game.players.filter(player => player.id !== socket.id);
-        console.log(`user disconnected ${socket.id}`);
+
     });
 });
 
