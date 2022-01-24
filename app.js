@@ -7,10 +7,32 @@ const Player = require("./models/Player");
 const { server, io, app } = require("./services/initApp");
 
 const game = new Game();
+var count = 0;
+var circleInterval = setInterval(() => {
+    game.onCircleInside();
+    if (game.circle.radius % 100 == 0) {
+        game.circleDec = false;
+        count++;
+    }
+    if (count == 5) {
+        count = 0;
+        game.circleDec = true;
+        game.changeCenter();
+    }
+    if (game.circle.radius < 100) {
+        game.circleDec = false;
+        clearInterval(circleInterval);
+    }
+    if (game.circleDec) {
+        game.circle.radius -= 5;
+        io.emit("CİRCLE", game.circle)
+    }
+}, 1000)
 
 setInterval(() => {
     game.update();
     io.emit("GAME_UPDATE", {
+        circle: game.circle,
         players: game.players.map(i => {
             return {
                 id: i.id,
@@ -33,7 +55,7 @@ setInterval(() => {
 
 io.on('connection', (socket) => {
     console.log(`user connection ${socket.id}`);
-    var player = new Player(game, socket.id, 100, 100);
+    var player = new Player(game, socket.id);
     game.players.push(player);
 
     socket.on("FIRE", (data) => {

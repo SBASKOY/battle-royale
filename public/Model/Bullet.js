@@ -6,12 +6,9 @@ class Bullet {
         this.posx = posx;
         this.posy = posy;
         this.imagePath = "./assets/bullets/0.png"
-
-
         this.isActive = true;
         this.distance = 0;
         this.maxDistance = 10;
-       
     }
 
     update = () => {

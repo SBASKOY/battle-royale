@@ -35,6 +35,8 @@ class Game {
         ]
         this.players = [];
         this.bullets = []
+        this.circle = {
+        }
         this.addEvent();
     }
     getMousePosition = (canvas, event) => {
@@ -92,6 +94,10 @@ class Game {
                 this.ctx.drawImage(this.images[imageType], i * TILE_W, j * TILE_H, TILE_W, TILE_H);
             }
         }
+
+        this.ctx.beginPath();
+        this.ctx.arc(this.circle.centerX, this.circle.centerY, this.circle.radius, 0, 2 * Math.PI);
+        this.ctx.stroke();
     }
     update = () => {
         this.draw();
@@ -111,22 +117,26 @@ class Game {
 
 
 var game = new Game();
-socket.on("GAME_UPDATE", ({ players, bullets }) => {
+socket.on("CİRCLE", (circle) => {
+    game.circle = circle;
+})
+socket.on("GAME_UPDATE", ({ circle, players, bullets }) => {
     var newPlayers = players.map(player => new Player(game, ctx, player.id, player.x, player.y, player.type, player.healty));
     var newBullets = bullets.map(bullet => new Bullet(ctx, bullet.id, bullet.playerID, bullet.x, bullet.y));
     game.players = newPlayers;
     game.bullets = newBullets;
-    var currentPlayer=game.players.find(i=>i.id==socket.id);
-    if(!currentPlayer){
-        ctx.font = "40px Arial";
-        ctx.fillStyle = "red"
-        ctx.fillText("öldünüz", W/2, 50);
-    }
-    if(currentPlayer.isActive){
+    var currentPlayer = game.players.find(i => i.id == socket.id);
+    if (!currentPlayer) {
         ctx.font = "40px Arial";
         ctx.fillStyle = "red"
         ctx.fillText("öldünüz", W / 2, 50);
     }
+    if (currentPlayer.isActive) {
+        ctx.font = "40px Arial";
+        ctx.fillStyle = "red"
+        ctx.fillText("öldünüz", W / 2, 50);
+    }
+
 
 });
 

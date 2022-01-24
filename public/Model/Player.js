@@ -48,8 +48,6 @@ class Player {
         if (keyCode == topKey || keyCode == bottomKey) socket.emit("PLAYER_MOVE", { diry: 0 })
     }
     mouseClick = ({ x, y }) => {
-       
         socket.emit("FIRE",{x:x,y:y})
-       
     }
 }

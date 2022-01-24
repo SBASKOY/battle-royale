@@ -1,18 +1,18 @@
 
 
-class Player{
-    constructor(game,id,posx,posy){
-        this.id=id;
-        this.game=game;
-        this.posx = posx;
-        this.posy = posy;
+class Player {
+    constructor(game, id) {
+        this.id = id;
+        this.game = game;
+        this.posx = this.getRandom(100, this.game.W - 100);;
+        this.posy = this.getRandom(100, this.game.H - 100);;
         this.dirx = 0;
         this.diry = 0;
         this.width = 20;
         this.height = 20;
         this.speed = 5;
-        this.targetX = posx;
-        this.targetY = posy;
+        this.targetX = this.posx;
+        this.targetY = this.posy;
         this.imagePath = `./assets/players/${this.getRandom(0, 4)}.png`;
         this.isDeath = false;
         this.healty = 100;
@@ -36,7 +36,7 @@ class Player{
     update = () => {
         this.move();
         if (this.healty < 1) {
-            
+
             this.isDeath = true;
         }
     }
