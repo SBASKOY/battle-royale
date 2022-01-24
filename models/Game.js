@@ -12,8 +12,16 @@ class Game {
             centerY: this.getRandom(100, this.H - 100),
             radius: 300
         };
-            this.circleDec = true;
-            this.circleCount=0;
+        this.circleDec = true;
+        this.circleCount = 0;
+        this.isStart=false;
+    }
+    resetCenter=()=>{
+        this.circle = {
+            centerX: this.getRandom(100, this.W - 100),
+            centerY: this.getRandom(100, this.H - 100),
+            radius: 300
+        };
     }
     changeCenter = () => {
         this.circle.centerX = this.getRandom(100, this.W - 100);
@@ -67,7 +75,7 @@ class Game {
 
         // console.log(this.bullets.length);
     }
-    addBullet=(player,data)=>{
+    addBullet = (player, data) => {
         var d = Math.sqrt(Math.pow(Math.abs(player.posx - data.x), 2) + Math.pow(Math.abs(player.posy - data.y), 2))
         var xChange = (data.x - player.posx) / (d / player.bulletSpeed);
         var yChange = (data.y - player.posy) / (d / player.bulletSpeed);
@@ -77,7 +85,7 @@ class Game {
             posy: player.posy,
         }, xChange, yChange, player.bulletColor));
     }
-    addPlayer(id){
+    addPlayer(id) {
         var player = new Player(this, id);
         this.players.push(player);
     }

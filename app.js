@@ -33,6 +33,9 @@ function startCircle(){
 
 setInterval(() => {
     game.update();
+    if(game.players.length==0){
+        game.isStart=false;
+    }
     io.emit("GAME_UPDATE", {
         players: game.players.map(i => {
             return {
@@ -59,13 +62,17 @@ io.on('connection', (socket) => {
 
     game.addPlayer(socket.id);
     if(game.players.length>1){
-        circleInterval=startCircle();
+        if(game.isStart==false){
+            game.resetCenter();
+            circleInterval = startCircle();
+            game.isStart=true;
+        }
     }
     socket.on("FIRE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
         if (player) {
             game.addBullet(player, data);
-        }
+        } 
     })
     socket.on("PLAYER_MOVE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
