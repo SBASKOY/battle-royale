@@ -5,27 +5,31 @@ const { server, io, app } = require("./services/initApp");
 
 const game = new Game();
 
+var circleInterval;
+function startCircle(){
+    return setInterval(() => {
+        game.onCircleInside();
+        if (game.circle.radius % 100 == 0) {
+            game.circleDec = false;
+            game.circleCount++;
+        }
+        if (game.circleCount == 5) {
+            game.circleCount = 0;
+            game.circleDec = true;
+            game.changeCenter();
+        }
+        if (game.circle.radius < 100) {
+            game.circleDec = false;
+            clearInterval(circleInterval);
+        }
+        if (game.circleDec) {
+            game.circle.radius -= 5;
+            io.emit("CİRCLE", game.circle)
+        }
+    }, 1000)
+}
 
-var circleInterval = setInterval(() => {
-    game.onCircleInside();
-    if (game.circle.radius % 100 == 0) {
-        game.circleDec = false;
-        game.circleCount++;
-    }
-    if (game.circleCount == 5) {
-        game.circleCount = 0;
-        game.circleDec = true;
-        game.changeCenter();
-    }
-    if (game.circle.radius < 100) {
-        game.circleDec = false;
-        clearInterval(circleInterval);
-    }
-    if (game.circleDec) {
-        game.circle.radius -= 5;
-        io.emit("CİRCLE", game.circle)
-    }
-}, 1000)
+
 
 setInterval(() => {
     game.update();
@@ -54,7 +58,9 @@ setInterval(() => {
 io.on('connection', (socket) => {
 
     game.addPlayer(socket.id);
-
+    if(game.players.length>1){
+        circleInterval=startCircle();
+    }
     socket.on("FIRE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
         if (player) {
