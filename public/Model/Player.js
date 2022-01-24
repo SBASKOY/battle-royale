@@ -28,7 +28,7 @@ class Player {
         return image;
     }
     draw = () => {
-        ctx.font = "15px Arial";
+        this.ctx.font = "15px Arial";
         this.ctx.fillStyle = "red"
         ctx.fillText(this.healty, this.posx, this.posy);
         this.ctx.drawImage(this.loadImage(), this.posx, this.posy, this.width, this.height);

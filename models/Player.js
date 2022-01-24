@@ -1,3 +1,5 @@
+
+
 class Player{
     constructor(game,id,posx,posy){
         this.id=id;
@@ -34,6 +36,7 @@ class Player{
     update = () => {
         this.move();
         if (this.healty < 1) {
+            
             this.isDeath = true;
         }
     }

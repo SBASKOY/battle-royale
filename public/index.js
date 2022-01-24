@@ -116,6 +116,17 @@ socket.on("GAME_UPDATE", ({ players, bullets }) => {
     var newBullets = bullets.map(bullet => new Bullet(ctx, bullet.id, bullet.playerID, bullet.x, bullet.y));
     game.players = newPlayers;
     game.bullets = newBullets;
+    var currentPlayer=game.players.find(i=>i.id==socket.id);
+    if(!currentPlayer){
+        ctx.font = "40px Arial";
+        ctx.fillStyle = "red"
+        ctx.fillText("öldünüz", W/2, 50);
+    }
+    if(currentPlayer.isActive){
+        ctx.font = "40px Arial";
+        ctx.fillStyle = "red"
+        ctx.fillText("öldünüz", W / 2, 50);
+    }
 
 });
 
