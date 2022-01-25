@@ -11,6 +11,7 @@ class Bullet {
         this.isActive = true;
         this.distance = 0;
         this.maxDistance = 10;
+        this.damage=player.damage;
 
     }
   

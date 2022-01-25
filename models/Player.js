@@ -1,8 +1,8 @@
 
 
 class Player {
-    constructor(game, id) {
-        this.id = id;
+    constructor(game, socket) {
+        this.id = socket.id;
         this.game = game;
         this.posx = this.getRandom(100, this.game.W - 100);;
         this.posy = this.getRandom(100, this.game.H - 100);;
@@ -17,7 +17,11 @@ class Player {
         this.isDeath = false;
         this.healty = 100;
         this.bulletSpeed = 10;
+        this.bulletDamage=1;
         this.bulletColor=this.getRandomColor();
+        this.bulletUpgradeCreated=Date.now();
+        this.bulletUpgrade=false;
+        this.socket=socket;
     }
     getRandom = (min, max) => {
         return Math.floor(Math.random() * (max - min) + min);
@@ -44,8 +48,19 @@ class Player {
     }
     update = () => {
         this.move();
+        this.socket.emit("PLAYER_UPDATE",{
+            damage:this.bulletDamage,
+            speed:this.bulletSpeed
+        })
+        if(this.bulletUpgrade){
+            var now = Date.now();
+            if (now - this.bulletUpgradeCreated > 5000) {
+                this.bulletSpeed = 10;
+                this.bulletDamage = 1;
+                this.bulletUpgrade = false;
+            }
+        }
         if (this.healty < 1) {
-
             this.isDeath = true;
         }
     }

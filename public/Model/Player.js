@@ -6,7 +6,7 @@ const rightKey = 68;
 const spaceKey = 32;
 
 class Player {
-    constructor(game, ctx,id, posx, posy,type,healty) {
+    constructor(game,ctx,id, posx, posy,type,healty) {
         this.id = id;
         this.game = game;
         this.ctx = ctx;
@@ -20,6 +20,7 @@ class Player {
         this.isDeath = false;
         this.healty = healty;
         this.bulletSpeed = 10;
+      
 
     }
     loadImage = () => {
@@ -30,7 +31,8 @@ class Player {
     draw = () => {
         this.ctx.font = "15px Arial";
         this.ctx.fillStyle = "red"
-        ctx.fillText(this.healty, this.posx, this.posy);
+        this.ctx.textAlign = "center";
+        ctx.fillText(this.healty, this.posx+(this.width/2), this.posy);
         this.ctx.drawImage(this.loadImage(), this.posx, this.posy, this.width, this.height);
     }
  

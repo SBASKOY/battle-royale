@@ -1,10 +1,14 @@
 
 const Bullet = require("./Bullet");
 const Player = require("./Player");
+const MedKit = require("./Medkit");
+const BulletUpgrade = require("./BulletUpgrade");
 class Game {
     constructor() {
         this.players = [];
         this.bullets = [];
+        this.medkits = [];
+        this.bulletUpgrade = [];
         this.W = 512;
         this.H = 512;
         this.circle = {
@@ -14,22 +18,22 @@ class Game {
         };
         this.circleDec = true;
         this.circleCount = 0;
-        this.isStart=false;
+        this.isStart = false;
     }
-    resetCenter=()=>{
+    reset = () => {
         this.circle = {
             centerX: this.getRandom(100, this.W - 100),
             centerY: this.getRandom(100, this.H - 100),
             radius: 300
         };
+        this.players.forEach(player => player.healty = 100);
     }
     changeCenter = () => {
         this.circle.centerX = this.getRandom(100, this.W - 100);
         this.circle.centerY = this.getRandom(100, this.H - 100);
     }
-    getRandom = (min, max) => {
-        return Math.floor(Math.random() * (max - min) + min);
-    }
+    getRandom = (min, max) => Math.floor(Math.random() * (max - min) + min);
+
     onBulletCollion = () => {
         this.bullets.forEach(bullet => {
             this.players.forEach(player => {
@@ -40,8 +44,48 @@ class Game {
                     && bullet.playerID != player.id
                 ) {
                     if (bullet.isActive) {
-                        player.healty -= 1;
+                        player.healty -= bullet.damage;
                         bullet.isActive = false;
+                    }
+                }
+            })
+        });
+    }
+    onMedkitCollision = () => {
+        this.medkits.forEach(medkit => {
+            this.players.forEach(player => {
+                if (player.posx > medkit.posx
+                    && player.posx < medkit.posx + medkit.w
+                    && player.posy > medkit.posy
+                    && player.posy < medkit.posy + medkit.h
+                ) {
+                    if (medkit.isActive) {
+                        if (player.healty < 100) {
+                            player.healty += medkit.healty;
+                            if (player.healty > 100) {
+                                player.healty == 100
+                            }
+                        }
+                        medkit.isActive = false;
+                    }
+                }
+            })
+        });
+    }
+    onBulletUpgradeCollision = () => {
+        this.bulletUpgrade.forEach(upgrade => {
+            this.players.forEach(player => {
+                if (player.posx > upgrade.posx
+                    && player.posx < upgrade.posx + upgrade.w
+                    && player.posy > upgrade.posy
+                    && player.posy < upgrade.posy + upgrade.h
+                ) {
+                    if (upgrade.isActive) {
+                        player.bulletSpeed = upgrade.speed;
+                        player.bulletDamage = upgrade.damage;
+                        player.bulletUpgrade=true;
+                        player.bulletUpgradeCreated=Date.now();
+                        upgrade.isActive = false;
                     }
                 }
             })
@@ -69,8 +113,14 @@ class Game {
                 bullet.isActive = false;
             }
         });
+        this.medkits.forEach(medkit => medkit.update());
+        this.bulletUpgrade.forEach(b => b.update());
         this.onBulletCollion();
+        this.onMedkitCollision();
+        this.onBulletUpgradeCollision();
         this.bullets = this.bullets.filter(i => i.isActive);
+        this.medkits = this.medkits.filter(i => i.isActive);
+        this.bulletUpgrade = this.bulletUpgrade.filter(i => i.isActive);
         this.players = this.players.filter(i => i.isDeath == false);
 
         // console.log(this.bullets.length);
@@ -79,15 +129,27 @@ class Game {
         var d = Math.sqrt(Math.pow(Math.abs(player.posx - data.x), 2) + Math.pow(Math.abs(player.posy - data.y), 2))
         var xChange = (data.x - player.posx) / (d / player.bulletSpeed);
         var yChange = (data.y - player.posy) / (d / player.bulletSpeed);
+        
         this.bullets.push(new Bullet({
             id: player.id,
             posx: player.posx,
             posy: player.posy,
+            damage:player.bulletDamage
         }, xChange, yChange, player.bulletColor));
     }
     addPlayer(id) {
         var player = new Player(this, id);
         this.players.push(player);
+    }
+    addMetkit = () => {
+        if (this.medkits.length < 5) {
+            this.medkits.push(new MedKit(this))
+        }
+    }
+    addBulletUpgrade = () => {
+        if (this.bulletUpgrade.length < 5) {
+            this.bulletUpgrade.push(new BulletUpgrade(this))
+        }
     }
 }
 module.exports = Game;

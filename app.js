@@ -6,9 +6,11 @@ const { server, io, app } = require("./services/initApp");
 const game = new Game();
 
 var circleInterval;
-function startCircle(){
+function startCircle() {
     return setInterval(() => {
         game.onCircleInside();
+        game.addMetkit();
+        game.addBulletUpgrade();
         if (game.circle.radius % 100 == 0) {
             game.circleDec = false;
             game.circleCount++;
@@ -18,7 +20,7 @@ function startCircle(){
             game.circleDec = true;
             game.changeCenter();
         }
-        if (game.circle.radius < 100) {
+        if (game.circle.radius < 55) {
             game.circleDec = false;
             clearInterval(circleInterval);
         }
@@ -29,50 +31,52 @@ function startCircle(){
     }, 1000)
 }
 
-
-
 setInterval(() => {
     game.update();
-    if(game.players.length==0){
-        game.isStart=false;
+    if (game.players.length < 2) {
+        game.isStart = false;
+        game.reset();
+        clearInterval(circleInterval);
     }
+
     io.emit("GAME_UPDATE", {
-        players: game.players.map(i => {
-            return {
-                id: i.id,
-                x: i.posx,
-                y: i.posy,
-                type: i.imagePath,
-                healty: i.healty
-            }
-        }),
-        bullets: game.bullets.map(i => {
-            return {
-                id: i.id,
-                playerID: i.playerID,
-                x: i.posx,
-                y: i.posy,
-                color: i.color
-            }
-        })
+        status: {
+            isStart: game.isStart,
+            msg: `Oyuncular bekleniyor. Mevcut Oyuncu ${game.players.length}`
+        },
+        bulletUpgrade:game.bulletUpgrade.map(i=>({x:i.posx,y:i.posy,w:i.w,h:i.h})),
+        medkits: game.medkits.map(i => ({ x: i.posx, y: i.posy,w:i.w,h:i.h })),
+        players: game.players.map(i => ({
+            id: i.id,
+            x: i.posx,
+            y: i.posy,
+            type: i.imagePath,
+            healty: i.healty
+        })),
+        bullets: game.bullets.map(i => ({
+            id: i.id,
+            playerID: i.playerID,
+            x: i.posx,
+            y: i.posy,
+            color: i.color
+        }))
     })
 }, 60);
 
 io.on('connection', (socket) => {
 
-    game.addPlayer(socket.id);
-    if(game.players.length>1){
-        if(game.isStart==false){
-            game.resetCenter();
+    game.addPlayer(socket);
+    if (game.players.length > 1) {
+        if (game.isStart == false) {
             circleInterval = startCircle();
-            game.isStart=true;
+            game.isStart = true;
         }
     }
     socket.on("FIRE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
         if (player) {
             game.addBullet(player, data);
-        } 
+        }
     })
     socket.on("PLAYER_MOVE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
@@ -83,11 +87,11 @@ io.on('connection', (socket) => {
     })
     socket.on('disconnect', () => {
         game.players = game.players.filter(player => player.id !== socket.id);
-
     });
 });
 
 const PORT = process.env.PORT || 1998;
+
 app.get("/", (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });

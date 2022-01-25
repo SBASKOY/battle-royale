@@ -35,9 +35,13 @@ class Game {
         ]
         this.players = [];
         this.bullets = []
-        this.circle = {
-        }
+        this.medkits = [];
+        this.bulletUpgrade = [];
+        this.circle = {};
+        this.status = {};
         this.isGameOver = false;
+        this.bulletSpeed = 10;
+        this.bulletDamage = 1;
         this.addEvent();
     }
     getMousePosition = (canvas, event) => {
@@ -64,24 +68,7 @@ class Game {
         image.src = path;
         return image;
     }
-    onBulletCollion = () => {
-        this.bullets.forEach(bullet => {
-            this.players.forEach(player => {
-                if (bullet.posx > player.posx
-                    && bullet.posx < player.posx + player.width
-                    && bullet.posy > player.posy
-                    && bullet.posy < player.posy + player.height
-                    && bullet.playerID != player.id
-                ) {
 
-                    if (bullet.isActive) {
-                        player.healty -= 1;
-                        bullet.isActive = false;
-                    }
-                }
-            })
-        });
-    }
     draw = () => {
         this.ctx.fillStyle = 'rgba(0,0,255,0.5)';
         this.ctx.fillRect(0, 0, W, H);
@@ -101,6 +88,16 @@ class Game {
             this.ctx.textAlign = "center";
             this.ctx.fillText("Öldünüz. İzleyeci Modundasınız", (W / 2), 50);
         }
+        if (!this.status.isStart) {
+            this.ctx.font = "15px Arial";
+            this.ctx.fillStyle = "blue"
+            this.ctx.textAlign = "center";
+            this.ctx.fillText(this.status.msg, (W / 2), 75);
+        }
+        this.ctx.font = "15px Arial";
+        this.ctx.fillStyle = "white"
+        
+        this.ctx.fillText(`Mermi Hızı: ${this.bulletSpeed}, Mermi Hasarı: ${this.bulletDamage}`, 110, 30);
         this.ctx.beginPath();
         this.ctx.arc(this.circle.centerX, this.circle.centerY, this.circle.radius, 0, 2 * Math.PI);
         this.ctx.stroke();
@@ -108,16 +105,9 @@ class Game {
     update = () => {
         this.draw();
         this.players.forEach(player => player.update());
-        this.bullets.forEach(bullet => {
-            bullet.update();
-            if (bullet.posx > W || bullet.posy < 0 || bullet.posy < 0 || bullet.posy > H) {
-                bullet.isActive = false;
-            }
-        });
-        this.onBulletCollion();
-        this.bullets = this.bullets.filter(i => i.isActive);
-        this.players = this.players.filter(i => i.isDeath == false);
-        // console.log(this.bullets.length);
+        this.medkits.forEach(m => m.update());
+        this.bulletUpgrade.forEach(m => m.update());
+        this.bullets.forEach(bullet => { bullet.update(); });
     }
 }
 
@@ -126,20 +116,26 @@ var game = new Game();
 socket.on("CİRCLE", (circle) => {
     game.circle = circle;
 })
-socket.on("GAME_UPDATE", ({ circle, players, bullets }) => {
+socket.on("PLAYER_UPDATE",(data)=>{
+    game.bulletSpeed=data.speed;
+    game.bulletDamage=data.damage;
+  
+})
+socket.on("GAME_UPDATE", ({ status, bulletUpgrade, medkits, players, bullets }) => {
+    //console.log(medkits)
     var newPlayers = players.map(player => new Player(game, ctx, player.id, player.x, player.y, player.type, player.healty));
     var newBullets = bullets.map(bullet => new Bullet(ctx, bullet.id, bullet.playerID, bullet.x, bullet.y, bullet.color));
+    var newMedkits = medkits.map(i => new Medkit(ctx, i.x, i.y, i.w, i.h));
+    var newBulletUpgrade = bulletUpgrade.map(i => new BulletUpgrade(ctx, i.x, i.y, i.w, i.h));
     game.players = newPlayers;
     game.bullets = newBullets;
+    game.medkits = newMedkits;
+    game.bulletUpgrade = newBulletUpgrade;
+    game.status = status;
     var currentPlayer = game.players.find(i => i.id == socket.id);
-    if (!currentPlayer) {
+    if (!currentPlayer || currentPlayer.isActive) {
         game.isGameOver = true;
     }
-    if (currentPlayer.isActive) {
-        game.isGameOver = true;
-    }
-
-
 });
 
 var interval = setInterval(() => {
