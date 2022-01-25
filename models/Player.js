@@ -35,10 +35,10 @@ class Player {
         return color;
     }
     move = () => {
-        this.targetX += this.dirx * this.speed;
-        this.targetY += this.diry * this.speed;
-        this.posx += (this.targetX - this.posx) * 0.5;
-        this.posy += (this.targetY - this.posy) * 0.5;
+        this.posx += this.dirx * this.speed;
+        this.posy += this.diry * this.speed;
+        // this.posx += (this.targetX - this.posx) * 0.5;
+        // this.posy += (this.targetY - this.posy) * 0.5;
 
         if (this.posx + 20 > this.game.W) this.posx = this.game.W - 20;
         if (this.posx < 0) this.posx = 0;
