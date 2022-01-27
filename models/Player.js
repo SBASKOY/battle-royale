@@ -17,11 +17,12 @@ class Player {
         this.isDeath = false;
         this.healty = 100;
         this.bulletSpeed = 10;
-        this.bulletDamage=1;
-        this.bulletColor=this.getRandomColor();
-        this.bulletUpgradeCreated=Date.now();
-        this.bulletUpgrade=false;
-        this.socket=socket;
+        this.bulletDamage = 1;
+        this.bulletColor = this.getRandomColor();
+        this.bulletUpgradeCreated = Date.now();
+        this.bulletUpgrade = false;
+        this.bulletCount = 0;
+        this.socket = socket;
     }
     getRandom = (min, max) => {
         return Math.floor(Math.random() * (max - min) + min);
@@ -48,15 +49,17 @@ class Player {
     }
     update = () => {
         this.move();
-        this.socket.emit("PLAYER_UPDATE",{
-            damage:this.bulletDamage,
-            speed:this.bulletSpeed
+        this.socket.emit("PLAYER_UPDATE", {
+            damage: this.bulletDamage,
+            speed: this.bulletSpeed,
+            bullets: this.bulletCount
         })
-        if(this.bulletUpgrade){
+        if (this.bulletUpgrade) {
             var now = Date.now();
             if (now - this.bulletUpgradeCreated > 5000) {
                 this.bulletSpeed = 10;
                 this.bulletDamage = 1;
+                //this.bulletCount=0;
                 this.bulletUpgrade = false;
             }
         }

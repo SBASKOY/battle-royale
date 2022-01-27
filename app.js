@@ -75,7 +75,10 @@ io.on('connection', (socket) => {
     socket.on("FIRE", (data) => {
         var player = game.players.find(i => i.id === socket.id);
         if (player) {
-            game.addBullet(player, data);
+            if(player.bulletCount>1){
+                game.addBullet(player, data);
+                player.bulletCount=Math.max(0,player.bulletCount-1);
+            }
         }
     })
     socket.on("PLAYER_MOVE", (data) => {

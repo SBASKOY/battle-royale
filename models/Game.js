@@ -54,11 +54,7 @@ class Game {
     onMedkitCollision = () => {
         this.medkits.forEach(medkit => {
             this.players.forEach(player => {
-                if (player.posx > medkit.posx
-                    && player.posx < medkit.posx + medkit.w
-                    && player.posy > medkit.posy
-                    && player.posy < medkit.posy + medkit.h
-                ) {
+                if (this.onFindDistance(player.posx, medkit.posx, player.posy, medkit.posy) < 10) {
                     if (medkit.isActive) {
                         if (player.healty < 100) {
                             player.healty += medkit.healty;
@@ -72,19 +68,18 @@ class Game {
             })
         });
     }
+    onFindDistance = (x1, x2, y1, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
     onBulletUpgradeCollision = () => {
         this.bulletUpgrade.forEach(upgrade => {
             this.players.forEach(player => {
-                if (player.posx > upgrade.posx
-                    && player.posx < upgrade.posx + upgrade.w
-                    && player.posy > upgrade.posy
-                    && player.posy < upgrade.posy + upgrade.h
-                ) {
+                if (this.onFindDistance(player.posx, upgrade.posx, player.posy, upgrade.posy) < 15) {
                     if (upgrade.isActive) {
                         player.bulletSpeed = upgrade.speed;
                         player.bulletDamage = upgrade.damage;
-                        player.bulletUpgrade=true;
-                        player.bulletUpgradeCreated=Date.now();
+                        player.bulletUpgrade = true;
+                        player.bulletUpgradeCreated = Date.now();
+                        player.bulletCount += upgrade.count
                         upgrade.isActive = false;
                     }
                 }
@@ -129,12 +124,12 @@ class Game {
         var d = Math.sqrt(Math.pow(Math.abs(player.posx - data.x), 2) + Math.pow(Math.abs(player.posy - data.y), 2))
         var xChange = (data.x - player.posx) / (d / player.bulletSpeed);
         var yChange = (data.y - player.posy) / (d / player.bulletSpeed);
-        
+
         this.bullets.push(new Bullet({
             id: player.id,
             posx: player.posx,
             posy: player.posy,
-            damage:player.bulletDamage
+            damage: player.bulletDamage
         }, xChange, yChange, player.bulletColor));
     }
     addPlayer(id) {

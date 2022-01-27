@@ -42,6 +42,7 @@ class Game {
         this.isGameOver = false;
         this.bulletSpeed = 10;
         this.bulletDamage = 1;
+        this.bulletCount = 0;
         this.addEvent();
     }
     getMousePosition = (canvas, event) => {
@@ -96,8 +97,8 @@ class Game {
         }
         this.ctx.font = "15px Arial";
         this.ctx.fillStyle = "white"
-        
-        this.ctx.fillText(`Mermi Hızı: ${this.bulletSpeed}, Mermi Hasarı: ${this.bulletDamage}`, 110, 30);
+        this.ctx.textAlign = "left";
+        this.ctx.fillText(`Mermi Sayısı: ${this.bulletCount} - Mermi Hızı: ${this.bulletSpeed}, Mermi Hasarı: ${this.bulletDamage}`, 110, 30);
         this.ctx.beginPath();
         this.ctx.arc(this.circle.centerX, this.circle.centerY, this.circle.radius, 0, 2 * Math.PI);
         this.ctx.stroke();
@@ -116,10 +117,11 @@ var game = new Game();
 socket.on("CİRCLE", (circle) => {
     game.circle = circle;
 })
-socket.on("PLAYER_UPDATE",(data)=>{
-    game.bulletSpeed=data.speed;
-    game.bulletDamage=data.damage;
-  
+socket.on("PLAYER_UPDATE", (data) => {
+    game.bulletSpeed = data.speed;
+    game.bulletDamage = data.damage;
+    game.bulletCount = data.bullets
+
 })
 socket.on("GAME_UPDATE", ({ status, bulletUpgrade, medkits, players, bullets }) => {
     //console.log(medkits)

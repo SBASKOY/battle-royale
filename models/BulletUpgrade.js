@@ -7,7 +7,8 @@ class BulletUpgrade {
         this.posy = this.getRandom(100, this.game.W - 100)
         this.isActive = true;
         this.speed = this.getRandom(10,20);
-        this.damage=this.getRandom(5,10)
+        this.damage=this.getRandom(5,10);
+        this.count=10;
         this.w = 10;
         this.h = 10;
         this.created = Date.now();
